@@ -16,7 +16,9 @@
  * Handles dynamic DOM manipulation, JSON file parsing, and YouTube iFrame 
  * generation with security origin compliance.
  * * @version 1.2.0
- * @author Gemini AI
+ * @author Jo Thomas - https://github.com/jo-thomas-1/
+ *
+ * @fileoverview Updated script with Validation, Clear All, and Back to Top logic.
  */
 
 /** @type {number} Global counter to ensure unique IDs for dynamic URL fields. */
@@ -137,69 +139,70 @@ function getYouTubeId(url) {
  * @return {void}
  */
 function handleGeneration(event) {
-    event.preventDefault(); // Stop page reload
-
+    event.preventDefault();
     const displayArea = document.getElementById('video-display-area');
     const inputElements = document.querySelectorAll('.url-input');
     
-    // Clear previous output (this also removes the "Waiting..." placeholder)
+    // Simple validation check before processing
+    let hasValidUrl = false;
     displayArea.innerHTML = '';
 
-    // Verify origin for YouTube API handshake (fixes Error 153)
     const currentOrigin = window.location.origin !== 'null' ? window.location.origin : '*';
 
     inputElements.forEach((input) => {
-        const rawUrl = input.value.trim();
-        const videoId = getYouTubeId(rawUrl);
-
+        const videoId = getYouTubeId(input.value.trim());
         if (videoId) {
+            hasValidUrl = true;
             const iframe = document.createElement('iframe');
-            
-            // Using 'youtube-nocookie.com' for privacy and compatibility
-            const baseUrl = `https://www.youtube-nocookie.com/embed/${videoId}`;
-            
             const params = new URLSearchParams({
-                autoplay: 1,
-                mute: 1,
-                loop: 1,
-                playlist: videoId,
-                enablejsapi: 1,
-                origin: currentOrigin
+                autoplay: 1, mute: 1, loop: 1, playlist: videoId, enablejsapi: 1, origin: currentOrigin
             });
-
-            iframe.src = `${baseUrl}?${params.toString()}`;
-            iframe.width = "320";
-            iframe.height = "180";
-            iframe.title = "YouTube Video Player";
+            iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?${params.toString()}`;
+            iframe.width = "320"; iframe.height = "180";
             iframe.frameBorder = "0";
-            
-            iframe.setAttribute('allowfullscreen', 'true');
-            iframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
-            iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
-            
+            iframe.allow = "autoplay; encrypted-media";
             displayArea.appendChild(iframe);
         }
     });
 
-    // --- UI Logic Post-Generation ---
-
-    if (displayArea.children.length > 0) {
-        // Smoothly scroll the user to the output section for better UX feedback
-        displayArea.scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'start' 
-        });
+    if (hasValidUrl) {
+        displayArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } else {
-        // If no videos were generated, restore the placeholder and provide feedback
         displayArea.innerHTML = `
             <div class="text-center py-5 w-100">
                 <h4 class="text-secondary opacity-50">Waiting for input url...</h4>
-                <div class="alert alert-warning d-inline-block mt-3">
-                    No valid YouTube IDs detected. Please check your URLs.
-                </div>
+                <div class="alert alert-warning d-inline-block mt-3">Please enter at least one valid YouTube URL.</div>
             </div>`;
     }
 }
+
+// --- Event Listeners for new UI features ---
+
+document.addEventListener('DOMContentLoaded', () => {
+    const backToTop = document.getElementById('backToTop');
+    const clearBtn = document.getElementById('clearAllBtn');
+
+    // Show/Hide Back to Top button on scroll
+    window.addEventListener('scroll', () => {
+        if (window.pageYOffset > 300) {
+            backToTop.style.display = 'flex';
+        } else {
+            backToTop.style.display = 'none';
+        }
+    });
+
+    // Scroll back to top logic
+    backToTop.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // Clear all logic
+    clearBtn.addEventListener('click', clearAll);
+    
+    // Existing listeners...
+    document.getElementById('importBtn').addEventListener('click', handleFileImport);
+    document.getElementById('viewsForm').addEventListener('submit', handleGeneration);
+});
 
 /**
  * Event Listener Assignments
@@ -218,3 +221,25 @@ document.addEventListener('DOMContentLoaded', () => {
         mainForm.addEventListener('submit', handleGeneration);
     }
 });
+
+/**
+ * Resets the entire application state.
+ */
+function clearAll() {
+    if (confirm("Are you sure you want to clear all inputs and generated videos?")) {
+        const container = document.getElementById('url-container');
+        const displayArea = document.getElementById('video-display-area');
+        
+        // Reset to exactly one empty field
+        container.innerHTML = `
+            <div class="input-group mb-3 url-input-group" id="group_0">
+                <input type="url" class="form-control url-input" id="input_field_0" 
+                       placeholder="https://www.youtube.com/watch?v=..." required>
+                <button class="btn btn-primary" type="button" onclick="addField()"><strong>+</strong></button>
+            </div>`;
+        
+        // Restore placeholder
+        displayArea.innerHTML = '<h4 class="text-secondary opacity-50 py-5">Waiting for input url...</h4>';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}

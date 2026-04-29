@@ -21,36 +21,30 @@
                     
                     <!-- Input -->
                     <section id="input-section" class="card shadow-sm p-4">
-                        <div class="mb-4">
-                            <label for="importLinks" class="form-label fw-bold">Import Links - JSON</label>
-                            <div class="input-group">
-                                <input type="file" class="form-control" id="importLinks" accept=".json">
-                                <button class="btn btn-outline-secondary" type="button" id="importBtn">Import</button>
-                            </div>
-                            <div id="importFeedback" class="form-text mt-2">Upload ".json" file containing array of URLs.</div>
-                        </div>
-
-                        <hr>
-
-                        <form id="viewsForm">
+                        <form id="viewsForm" novalidate>
                             <div id="url-container">
                                 <div class="input-group mb-3 url-input-group" id="group_0">
-                                    <input type="url" 
-                                           class="form-control url-input" 
-                                           id="input_field_0" 
-                                           placeholder="https://www.youtube.com/watch?v=..."
-                                           required>
-                                    <button class="btn btn-primary" type="button" onclick="addField()">
-                                        <strong>+</strong>
-                                    </button>
+                                    <input type="url" class="form-control url-input" id="input_field_0" 
+                                           placeholder="https://www.youtube.com/watch?v=..." required>
+                                    <div class="invalid-feedback">Please enter a valid YouTube URL.</div>
+                                    <button class="btn btn-primary" type="button" onclick="addField()"><strong>+</strong></button>
                                 </div>
                             </div>
                             
-                            <div class="d-grid mt-4">
-                                <button type="submit" class="btn btn-success btn-lg">Generate</button>
+                            <div class="row g-2 mt-4">
+                                <div class="col-md-8 d-grid">
+                                    <button type="submit" class="btn btn-success btn-lg">Generate</button>
+                                </div>
+                                <div class="col-md-4 d-grid">
+                                    <button type="button" class="btn btn-outline-danger btn-lg" id="clearAllBtn">Clear All</button>
+                                </div>
                             </div>
                         </form>
                     </section>
+
+                    <button type="button" class="btn btn-primary btn-lg rounded-circle shadow" id="backToTop" style="display: none;">
+                        ↑
+                    </button>
 
                     <hr class="my-5">
 
