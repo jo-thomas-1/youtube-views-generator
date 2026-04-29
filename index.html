@@ -19,6 +19,7 @@
                         <p class="text-muted">Enter video URLs below to generate simultaneous views.</p>
                     </header>
                     
+                    <!-- Input -->
                     <section id="input-section" class="card shadow-sm p-4">
                         <div class="mb-4">
                             <label for="importLinks" class="form-label fw-bold">Import Links - JSON</label>
@@ -53,9 +54,10 @@
 
                     <hr class="my-5">
 
+                    <!-- Output -->
                     <section id="output-section">
-                        <h4 class="text-center text-secondary mb-3">Processing Section</h4>
-                        <div id="video-display-area" class="d-flex flex-wrap justify-content-center gap-2">
+                        <div id="video-display-area" class="d-flex flex-wrap justify-content-center gap-2 align-items-center">
+                            <h4 class="text-secondary opacity-50 py-5" id="placeholder-text">Waiting for input url...</h4>
                         </div>
                     </section>
                 </div>

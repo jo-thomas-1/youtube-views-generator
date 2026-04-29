@@ -131,7 +131,8 @@ function getYouTubeId(url) {
 
 /**
  * Main execution function triggered by form submission.
- * Validates URLs, constructs the secure iFrame, and updates the output section.
+ * Validates URLs, constructs the secure iFrame, and handles UI transitions.
+ * Includes auto-scroll and dynamic placeholder management.
  * * @param {Event} event The form submission event.
  * @return {void}
  */
@@ -141,7 +142,7 @@ function handleGeneration(event) {
     const displayArea = document.getElementById('video-display-area');
     const inputElements = document.querySelectorAll('.url-input');
     
-    // Clear previous session output
+    // Clear previous output (this also removes the "Waiting..." placeholder)
     displayArea.innerHTML = '';
 
     // Verify origin for YouTube API handshake (fixes Error 153)
@@ -154,14 +155,9 @@ function handleGeneration(event) {
         if (videoId) {
             const iframe = document.createElement('iframe');
             
-            // Using 'youtube-nocookie.com' for enhanced privacy and bypass of some config errors
+            // Using 'youtube-nocookie.com' for privacy and compatibility
             const baseUrl = `https://www.youtube-nocookie.com/embed/${videoId}`;
             
-            // URL Parameter Construction:
-            // 1. autoplay=1: Starts video immediately.
-            // 2. mute=1: Required for autoplay permissions.
-            // 3. loop=1 & playlist: Enables infinite looping.
-            // 4. enablejsapi=1 & origin: Handshake for Error 153 prevention.
             const params = new URLSearchParams({
                 autoplay: 1,
                 mute: 1,
@@ -177,7 +173,6 @@ function handleGeneration(event) {
             iframe.title = "YouTube Video Player";
             iframe.frameBorder = "0";
             
-            // Standard security and permission attributes
             iframe.setAttribute('allowfullscreen', 'true');
             iframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
             iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
@@ -186,9 +181,23 @@ function handleGeneration(event) {
         }
     });
 
-    // Provide feedback if no valid videos were processed
-    if (displayArea.children.length === 0) {
-        displayArea.innerHTML = '<div class="alert alert-warning">No valid YouTube IDs detected. Check your URLs.</div>';
+    // --- UI Logic Post-Generation ---
+
+    if (displayArea.children.length > 0) {
+        // Smoothly scroll the user to the output section for better UX feedback
+        displayArea.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start' 
+        });
+    } else {
+        // If no videos were generated, restore the placeholder and provide feedback
+        displayArea.innerHTML = `
+            <div class="text-center py-5 w-100">
+                <h4 class="text-secondary opacity-50">Waiting for input url...</h4>
+                <div class="alert alert-warning d-inline-block mt-3">
+                    No valid YouTube IDs detected. Please check your URLs.
+                </div>
+            </div>`;
     }
 }
 
