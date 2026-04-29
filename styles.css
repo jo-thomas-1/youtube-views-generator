@@ -1,0 +1,38 @@
+/**
+ * @fileoverview Custom styles for the Views Generator.
+ * Provides layout constraints and visual polish for embedded videos.
+ */
+
+body {
+    background-color: #f0f2f5;
+}
+
+/* Ensure the output area looks organized */
+#video-display-area {
+    min-height: 200px;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px dashed #ccc;
+}
+
+/* Styling for the embedded iframes */
+iframe {
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+iframe:hover {
+    transform: scale(1.02);
+}
+
+/* Animation for adding new input fields */
+.url-input-group {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
