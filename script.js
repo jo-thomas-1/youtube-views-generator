@@ -139,41 +139,51 @@ function getYouTubeId(url) {
  * @return {void}
  */
 function handleGeneration(event) {
-    event.preventDefault();
-    const displayArea = document.getElementById('video-display-area');
-    const inputElements = document.querySelectorAll('.url-input');
-    
-    // Simple validation check before processing
-    let hasValidUrl = false;
-    displayArea.innerHTML = '';
+  event.preventDefault();
+  const displayArea = document.getElementById('video-display-area');
+  const inputElements = document.querySelectorAll('.url-input');
+  
+  // Simple validation check before processing
+  let hasValidUrl = false;
+  displayArea.innerHTML = '';
 
-    const currentOrigin = window.location.origin !== 'null' ? window.location.origin : '*';
+  const currentOrigin = window.location.origin !== 'null' ? window.location.origin : '*';
+  console.group("Views Generator Diagnostic");
+  console.log("Current Origin:", currentOrigin);
 
-    inputElements.forEach((input) => {
-        const videoId = getYouTubeId(input.value.trim());
-        if (videoId) {
-            hasValidUrl = true;
-            const iframe = document.createElement('iframe');
-            const params = new URLSearchParams({
-                autoplay: 1, mute: 1, loop: 1, playlist: videoId, enablejsapi: 1, origin: currentOrigin
-            });
-            iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?${params.toString()}`;
-            iframe.width = "320"; iframe.height = "180";
-            iframe.frameBorder = "0";
-            iframe.allow = "autoplay; encrypted-media";
-            displayArea.appendChild(iframe);
-        }
-    });
+  if (currentOrigin === 'null' || currentOrigin.startsWith('file://')) {
+    console.warn("WARNING: Running from a local file (file://) often triggers Error 153. Try using a local server (like Live Server in VS Code).");
+  }
 
-    if (hasValidUrl) {
-        displayArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    } else {
-        displayArea.innerHTML = `
-            <div class="text-center py-5 w-100">
-                <h4 class="text-secondary opacity-50">Waiting for input url...</h4>
-                <div class="alert alert-warning d-inline-block mt-3">Please enter at least one valid YouTube URL.</div>
-            </div>`;
+  inputElements.forEach((input, index) => {
+    const videoId = getYouTubeId(input.value.trim());
+    if (videoId) {
+      console.group(`Processing Field ${index}: ID = ${videoId}`);
+      hasValidUrl = true;
+      const iframe = document.createElement('iframe');
+      const params = new URLSearchParams({
+          autoplay: 1, mute: 1, loop: 1, playlist: videoId, enablejsapi: 1, origin: currentOrigin
+      });
+      iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?${params.toString()}`;
+      iframe.width = "320"; iframe.height = "180";
+      iframe.frameBorder = "0";
+      iframe.allow = "autoplay; encrypted-media";
+      displayArea.appendChild(iframe);
+      console.log(`Generated Iframe URL for Field ${index}:`, iframe.src);
+      console.groupEnd();
     }
+  });
+
+  if (hasValidUrl) {
+      displayArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } else {
+      displayArea.innerHTML = `
+          <div class="text-center py-5 w-100">
+              <h4 class="text-secondary opacity-50">Waiting for input url...</h4>
+              <div class="alert alert-warning d-inline-block mt-3">Please enter at least one valid YouTube URL.</div>
+          </div>`;
+  }
+  console.groupEnd();
 }
 
 // --- Event Listeners for new UI features ---
@@ -240,6 +250,10 @@ function clearAll() {
         
         // Restore placeholder
         displayArea.innerHTML = '<h4 class="text-secondary opacity-50 py-5">Waiting for input url...</h4>';
+
+        // clear import status
+        document.getElementById('importFeedback').innerHTML = 'Upload ".json" file containing array of URLs.';
+
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 }
